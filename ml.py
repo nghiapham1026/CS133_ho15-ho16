@@ -104,3 +104,23 @@ full_pipeline = ColumnTransformer([
 # Apply the full pipeline to the training and testing dataset
 train_prepared_final = full_pipeline.fit_transform(strat_train_set)
 test_prepared_final = full_pipeline.transform(strat_test_set)
+
+from sklearn.model_selection import cross_val_score
+from sklearn.linear_model import LogisticRegression
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.svm import SVC, LinearSVC
+
+# Initialize models
+reduced_models = {
+    'Logistic Regression': LogisticRegression(max_iter=1000),
+    'Decision Tree': DecisionTreeClassifier(),
+    'Random Forest': RandomForestClassifier(),
+    #'SVM': SVC() Too intensive, crashing the environment
+}
+
+# Perform 10-fold cross-validation for the reduced set of models
+reduced_cv_scores = {}
+for name, model in reduced_models.items():
+    scores = cross_val_score(model, train_prepared_final, strat_train_set['income'], cv=10, n_jobs=-1)
+    reduced_cv_scores[name] = scores
