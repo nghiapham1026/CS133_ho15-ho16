@@ -75,3 +75,32 @@ full_pipeline = ColumnTransformer([
 # Apply the full pipeline to transform training and testing data
 train_x = full_pipeline.fit_transform(train_x)
 test_x = full_pipeline.transform(test_x)
+
+import numpy as np
+from sklearn.base import BaseEstimator, TransformerMixin
+
+# Adding interaction terms between 'age' and 'hours-per-week'
+class CombinedAttributesAdder(BaseEstimator, TransformerMixin):
+    def fit(self, X, y=None):
+        return self  # Nothing else to do
+
+    def transform(self, X):
+        age_hours_interaction = X[:, num_attribs.index('age')] * X[:, num_attribs.index('hours-per-week')]
+        return np.c_[X, age_hours_interaction]
+
+# Updating the numerical pipeline to include the attribute adder
+num_pipeline = Pipeline([
+    ('imputer', SimpleImputer(strategy="median")),  # fill in missing values with median
+    ('attribs_adder', CombinedAttributesAdder()),   # adding new feature
+    ('std_scaler', StandardScaler()),               # scale features
+])
+
+# Full pipeline remains unchanged in structure but will now include the updated num_pipeline
+full_pipeline = ColumnTransformer([
+    ("num", num_pipeline, num_attribs),
+    ("cat", cat_pipeline, cat_attribs),
+])
+
+# Apply the full pipeline to the training and testing dataset
+train_prepared_final = full_pipeline.fit_transform(strat_train_set)
+test_prepared_final = full_pipeline.transform(strat_test_set)
