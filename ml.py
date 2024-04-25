@@ -53,3 +53,25 @@ full_pipeline = ColumnTransformer([
 # Apply transformations
 train_x = full_pipeline.fit_transform(train_x)
 test_x = full_pipeline.transform(test_x)
+
+# Define a pipeline for processing numerical attributes with median imputation and standard scaling
+num_pipeline = Pipeline([
+    ('imputer', SimpleImputer(strategy="median")),
+    ('std_scaler', StandardScaler()),
+])
+
+# Define a pipeline for processing categorical attributes with most frequent imputation and one-hot encoding
+cat_pipeline = Pipeline([
+    ('imputer', SimpleImputer(strategy="most_frequent")),
+    ('onehot', OneHotEncoder(handle_unknown='ignore')),
+])
+
+# Combine numerical and categorical pipelines into a single column transformer
+full_pipeline = ColumnTransformer([
+    ("num", num_pipeline, num_attribs),
+    ("cat", cat_pipeline, cat_attribs),
+])
+
+# Apply the full pipeline to transform training and testing data
+train_x = full_pipeline.fit_transform(train_x)
+test_x = full_pipeline.transform(test_x)
