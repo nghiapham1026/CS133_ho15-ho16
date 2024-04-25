@@ -124,3 +124,43 @@ reduced_cv_scores = {}
 for name, model in reduced_models.items():
     scores = cross_val_score(model, train_prepared_final, strat_train_set['income'], cv=10, n_jobs=-1)
     reduced_cv_scores[name] = scores
+
+# Run LinearSVC separately as it would crash the environment if run together with others
+svm_model = LinearSVC()
+svm_scores = cross_val_score(svm_model, train_prepared_final, strat_train_set['income'], cv=10, n_jobs=-1)
+print('SVM Scores:', svm_scores)
+reduced_cv_scores['SVM'] = svm_scores
+
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import GridSearchCV
+
+param_grid = [ # From the lecture
+    # try 12 (3×4) combinations of hyperparameters
+    {'n_estimators': [3, 10, 30], 'max_features': [2, 4, 6, 8]},
+    # then try 6 (2×3) combinations with bootstrap set as False
+    {'bootstrap': [False], 'n_estimators': [3, 10], 'max_features': [2, 3, 4]},
+  ]
+
+# Initialize GridSearchCV with the RandomForest classifier
+grid_search = GridSearchCV(
+    estimator=RandomForestClassifier(random_state=42),
+    param_grid=param_grid,
+    cv=10,  # 5-fold cross-validation
+    scoring='accuracy',
+    n_jobs=-1,  # Use all available cores
+    verbose=1
+)
+
+# Grid Search using 30% of training data since the original dataset takes too long
+_, sample_data, _, sample_target = train_test_split(
+    train_prepared_final, strat_train_set['income'], test_size=0.3, random_state=42, stratify=strat_train_set['income'])
+
+# Fit GridSearchCV to the sampled training data
+grid_search.fit(sample_data, sample_target)
+
+# Extract the best parameters and the best model
+best_params = grid_search.best_params_
+best_model = grid_search.best_estimator_
+
+print("Best parameters:", best_params)
+print("Best model:", best_model)
