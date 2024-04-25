@@ -186,3 +186,39 @@ test_confusion_matrix = confusion_matrix(test_y, test_predictions)
 print("Test Accuracy:", test_accuracy)
 print("Classification Score:", test_classification_report)
 print("Confusion Matrix:", test_confusion_matrix)
+
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import roc_curve, auc
+import matplotlib.pyplot as plt
+
+# Split data into training and test sets
+X_train, X_test, y_train, y_test = train_test_split(
+    train_prepared_final, strat_train_set['income'], test_size=0.3, random_state=42, stratify=strat_train_set['income'])
+
+# Hashmap to hold model ROC data
+roc_data = {}
+
+# Train each model and calculate ROC curve and AUC
+for name, model in reduced_models.items():
+    # Train model
+    model.fit(X_train, y_train)
+    # Predict probabilities for the positive class
+    y_scores = model.predict_proba(X_test)[:, 1]
+    # Compute ROC curve and ROC area
+    fpr, tpr, _ = roc_curve(y_test, y_scores)
+    roc_auc = auc(fpr, tpr)
+    roc_data[name] = (fpr, tpr, roc_auc)
+
+# Plotting all ROC curves
+plt.figure(figsize=(10, 8))
+for name, (fpr, tpr, roc_auc) in roc_data.items():
+    plt.plot(fpr, tpr, label=f'{name} (area = {roc_auc:.2f})')
+
+plt.plot([0, 1], [0, 1], 'k--', label='No Skill')
+plt.xlim([0.0, 1.0])
+plt.ylim([0.0, 1.05])
+plt.xlabel('False Positive Rate')
+plt.ylabel('True Positive Rate')
+plt.title('Receiver Operating Characteristic')
+plt.legend(loc="lower right")
+plt.show()
