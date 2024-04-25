@@ -164,3 +164,25 @@ best_model = grid_search.best_estimator_
 
 print("Best parameters:", best_params)
 print("Best model:", best_model)
+
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+
+# Load best model from grid search
+best_model = grid_search.best_estimator_
+
+# Predict the target variable for the test set
+test_predictions = best_model.predict(test_prepared_final)
+
+# Calculate the accuracy of the model on the test set
+test_accuracy = accuracy_score(test_y, test_predictions)
+
+# Generate a classification report
+test_classification_report = classification_report(test_y, test_predictions)
+
+# Generate a confusion matrix
+test_confusion_matrix = confusion_matrix(test_y, test_predictions)
+
+# Print the test accuracy, classification report, and confusion matrix
+print("Test Accuracy:", test_accuracy)
+print("Classification Score:", test_classification_report)
+print("Confusion Matrix:", test_confusion_matrix)
