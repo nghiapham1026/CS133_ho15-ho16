@@ -27,3 +27,29 @@ train_x = strat_train_set.drop('income', axis=1)
 train_y = strat_train_set['income']
 test_x = strat_test_set.drop('income', axis=1)
 test_y = strat_test_set['income']
+
+# Columns for transformations
+num_attribs = train_x.select_dtypes(include=['int64', 'float64']).columns.tolist()
+cat_attribs = train_x.select_dtypes(include=['object']).columns.tolist()
+
+# Pipeline for numerical attributes
+num_pipeline = Pipeline([
+    ('imputer', SimpleImputer(strategy="median")),
+    ('std_scaler', StandardScaler()),
+])
+
+# Pipeline for categorical attributes
+cat_pipeline = Pipeline([
+    ('imputer', SimpleImputer(strategy="most_frequent")),
+    ('onehot', OneHotEncoder(handle_unknown='ignore')),
+])
+
+# Full pipeline for all transformations
+full_pipeline = ColumnTransformer([
+    ("num", num_pipeline, num_attribs),
+    ("cat", cat_pipeline, cat_attribs),
+])
+
+# Apply transformations
+train_x = full_pipeline.fit_transform(train_x)
+test_x = full_pipeline.transform(test_x)
