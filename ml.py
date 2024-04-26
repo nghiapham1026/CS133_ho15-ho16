@@ -226,6 +226,10 @@ plt.show()
 from sklearn.metrics import precision_recall_curve, PrecisionRecallDisplay, confusion_matrix
 import matplotlib.pyplot as plt
 
+# Convert categorical predictions to the same format as y_test to fix mismatch error
+def convert_predictions(y_pred, classes):
+    return [0 if label == classes[0] else 1 for label in y_pred]
+
 # Dictionary to store model predictions
 model_predictions = {}
 
