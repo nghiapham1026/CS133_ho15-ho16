@@ -222,3 +222,21 @@ plt.ylabel('True Positive Rate')
 plt.title('Receiver Operating Characteristic')
 plt.legend(loc="lower right")
 plt.show()
+
+from sklearn.metrics import precision_recall_curve, PrecisionRecallDisplay, confusion_matrix
+import matplotlib.pyplot as plt
+
+# Dictionary to store model predictions
+model_predictions = {}
+
+# Fit models and store predictions
+for name, model in reduced_models.items():
+    model.fit(X_train, y_train)
+    # Predict class probabilities for models that support it
+    if hasattr(model, "predict_proba"):
+        proba_predictions = model.predict_proba(X_test)[:, 1]  # Probabilities for the positive class
+        model_predictions[name] = proba_predictions
+    else:
+        # Use decision function if predict_proba is not available
+        decision_scores = model.decision_function(X_test)
+        model_predictions[name] = decision_scores
