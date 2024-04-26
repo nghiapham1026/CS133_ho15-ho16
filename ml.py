@@ -244,3 +244,16 @@ for name, model in reduced_models.items():
         # Use decision function if predict_proba is not available
         decision_scores = model.decision_function(X_test)
         model_predictions[name] = decision_scores
+
+# Plot precision-recall curves
+plt.figure(figsize=(10, 8))
+for name, predictions in model_predictions.items():
+    precision, recall, _ = precision_recall_curve(y_test, predictions)
+    disp = PrecisionRecallDisplay(precision=precision, recall=recall)
+    disp.plot(label=name)
+
+plt.title('Precision-Recall Curve')
+plt.xlabel('Recall')
+plt.ylabel('Precision')
+plt.legend(loc="best")
+plt.show()
